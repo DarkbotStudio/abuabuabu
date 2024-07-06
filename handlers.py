@@ -2,7 +2,7 @@ from aiogram import types, Router
 from aiogram.types import Message
 from aiogram.filters import Command
 import config
-from procfiles import db,nsfwdetector
+from procfiles import db,nsfwdetector,procfile
 
 router = Router()
 
@@ -14,19 +14,6 @@ async def start_handler(msg: Message):
     """Handler /start command"""
     user_id = msg.from_user.id
     if await db.is_user_in_db(user_id):
-        def calculate_rank(popularity):
-            if 0 == popularity <= 99:
-                return 'D'
-            elif 100 <= popularity <= 999:
-                return 'C'
-            elif 1000 <= popularity <= 9999:
-                return 'B'
-            elif 10000 <= popularity <= 99999:
-                return 'A'
-            elif 100000 <= popularity <= 999999:
-                return 'S'
-            elif popularity >= 1000000:
-                return 'S+'
         data = await db.load_user_data(user_id)
         menu_btns = [
             [
@@ -51,7 +38,7 @@ async def start_handler(msg: Message):
                          f"🆔 ID: {user_id}\n"
                          f"📒 Имя: {data[1]}\n"
                          f"👥 В флуде: {'да' if data[2] is not None else 'нет'}\n"
-                         f"📈 Ранг: {calculate_rank(data[10])} ({data[10]})", reply_markup=menu)
+                         f"📈 Ранг: {procfile.calculate_rank(data[10])} ({data[10]})", reply_markup=menu)
     else:
         await msg.answer(f"Привет, {msg.from_user.full_name}!\n"
                          f"Давно хотел вступить в флуд но не можешь найти подходящий?\n"
@@ -70,9 +57,7 @@ async def reg_handler(msg: Message):
         await msg.answer("Вы уже зарегистрированы!\n"
                          "Напишите /start чтобы открыть меню")
     else:
-        def extract_data(text):
-            return text.split() if len(text.split()) > 1 else None
-        data = extract_data(msg.text)
+        data = procfile.extract_data(msg.text)
         if data:
             name = str(data[1]).capitalize()
             age = data[2]
