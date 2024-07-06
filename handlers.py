@@ -61,8 +61,8 @@ async def reg_handler(msg: Message):
         if data:
             name = str(data[1]).capitalize()
             age = data[2]
-            country = data[3]
-            role = data[4]
+            country = str(data[3]).capitalize()
+            role = str(data[4]).capitalize()
             if country in countries:
                 if role in brawlers:
                     await db.register_user(user_id, name, None, None, age, country, None)
@@ -72,3 +72,4 @@ async def reg_handler(msg: Message):
             else: await msg.answer("Не удалось зарегистрироваться, проверьте правильность написания вашей страны.\n"
                                    "Или может вы придумали новую страну?🤨")
         else: await msg.answer("Не удалось зарегистрироваться, возможно вы ввели не все данные")
+
