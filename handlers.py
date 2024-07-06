@@ -1,9 +1,8 @@
-from aiogram import types, F, Router
+from aiogram import types, Router
 from aiogram.types import Message
 from aiogram.filters import Command
 import config
-import nsfwdetector
-import db
+from procfiles import db,nsfwdetector
 
 router = Router()
 
