@@ -1,8 +1,11 @@
-from aiogram import types, Router
-from aiogram.types import Message
+import flag
+from aiogram import types, Router, F
+from aiogram.types import Message, CallbackQuery
 from aiogram.filters import Command
 import config
 from procfiles import db,nsfwdetector,procfile
+
+
 
 router = Router()
 
@@ -16,9 +19,6 @@ async def start_handler(msg: Message):
     if await db.is_user_in_db(user_id):
         data = await db.load_user_data(user_id)
         menu_btns = [
-            [
-                types.InlineKeyboardButton(text=f'{"🔍 Найти флуд" if data[2] is None else "🧑 Мой флуд"}', callback_data=f'{"search_flood" if data[2] is None else "my_flood"}')
-            ],
             [
                 types.InlineKeyboardButton(text="👥 Флуды", callback_data="floods"),
                 types.InlineKeyboardButton(text="🔝 Топ флудов", callback_data="top_floods")
@@ -73,3 +73,56 @@ async def reg_handler(msg: Message):
                                    "Или может вы придумали новую страну?🤨")
         else: await msg.answer("Не удалось зарегистрироваться, возможно вы ввели не все данные")
 
+@router.callback_query(F.data == "floods")
+async def floods_menu_handler(call: CallbackQuery):
+    kb = [
+        [
+            types.InlineKeyboardButton(text="🔍 Найти флуд", callback_data="search_flood")
+        ],
+        [
+            types.InlineKeyboardButton(text="➕ Создать флуд", callback_data="create_flood")
+        ]
+    ]
+    menu = types.InlineKeyboardMarkup(inline_keyboard=kb)
+    try:
+        await call.message.edit_text("В этом меню вы можете создать или найти флуд:", reply_markup=menu)
+    except:
+        await call.message.answer("В этом меню вы можете создать или найти флуд:", reply_markup=menu)
+@router.callback_query(F.data == "search_flood")
+async def search_flood_handler(call: CallbackQuery):
+    user_id = call.from_user.id
+    user_filters = await db.get_user_filters(user_id)
+    search_flood_btns = [
+        [types.InlineKeyboardButton(text="🔍 Найти флуд", callback_data="search_flood_start")],
+        [types.InlineKeyboardButton(text=f"Моя роль свободная {'✅' if user_filters[2] == 1 else '❌'}",
+                                    callback_data="filters_switch_role_free"),
+         types.InlineKeyboardButton(text=f"Включен Saturn Protect {'✅' if user_filters[6] == 1 else '❌'}",
+                                    callback_data="filters_switch_saturn_protect_on")],
+        [types.InlineKeyboardButton(text=f"Норма сообщений в неделю: {user_filters[5]}",
+                                    callback_data="filters_switch_norma")],
+        [
+            types.InlineKeyboardButton(text=f"Регион 1: {flag.flag(user_filters[3])}",
+                                       callback_data="filters_switch_region_1"),
+            types.InlineKeyboardButton(text=f"Регион 2: {flag.flag(user_filters[4])}",
+                                       callback_data="filters_switch_region_2")
+        ]
+    ]
+
+    search_flood_markup = types.InlineKeyboardMarkup(inline_keyboard=search_flood_btns)
+    try:
+        await call.message.edit_text("В этом меню в с легкостью найдете флуд\n"
+                                  "А в фильтрах настроить все по своему вкусу чтобы вам попался именно тот флуд, который вам нужно!", reply_markup=search_flood_markup)
+    except:
+        await call.message.answer("В этом меню в с легкостью найдете флуд\n"
+                                  "А в фильтрах настроить все по своему вкусу чтобы вам попался именно тот флуд, который вам нужно!", reply_markup=search_flood_markup)
+
+@router.callback_query(F.data.startwith == "filters_")
+async def change_filters_handler(call: CallbackQuery):
+    user_id = call.from_user.id
+    params = call.data.replace("filters_", "")
+    user_filters = await db.get_user_filters(user_id)
+    if params == "switch_role_free":
+        await db.update_user_filter(user_id, "user_role_free", 0 if user_filters[2] == 1 else 1)
+    elif params == "switch_saturn_protect_on":
+        await db.update_user_filter(user_id, "saturn_protect_on", 0 if user_filters[6] == 1 else 1)
+    elif params ==
