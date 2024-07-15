@@ -1,4 +1,4 @@
 venv/
 __pycache__/
 .idea/
-data/db.db
+linux_env/

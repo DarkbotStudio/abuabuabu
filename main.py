@@ -3,7 +3,7 @@ import logging
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums.parse_mode import ParseMode
-import config
+from procfiles import config
 from handlers import router
 import os
 from colorlog import ColoredFormatter

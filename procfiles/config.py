@@ -1,5 +1,5 @@
-BOT_TOKEN = "7400814042:AAEN2QoYaNhQOsdWCS7OQPiGYNdGINZNZ7I"
-DB_PATH = "data/db.db"
+BOT_TOKEN = "7400814042:AAFV1e8MGrGDthcYhmQsWf39y9zKZhfATio"
+DB_PATH = "../data/db.db"
 brawlers = [
     "Клэнси",
     "Берри",
